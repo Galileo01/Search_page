@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width,height=device-height,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>聚合搜索</title>
+        <link rel="shortcut icon" href="icon.png" type="image/x-icon" />
+        <style>
+            html {
+                font-size: 10px;
+            }
+
+            body,
+            html {
+                padding: 0;
+                margin: 0;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            .total-entrance {
+                /* width: 40%; */
+                width: 100%;
+                height: 10vh;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 0;
+                margin-top: 18%;
+
+                position: relative;
+                z-index: 1;
+            }
+
+            .ent-wapper {
+                width: 100%;
+                margin: 0 auto 0 auto;
+                position: relative;
+            }
+
+            .total-slide-up {
+                animation: search-slide ease-in-out 0.3s;
+                margin-top: 0;
+                /* position: fixed;
+            left: 50%;
+            transform: translate(-50%, 0); */
+            }
+
+            .total-slide-up .search-wapper {
+                border-bottom: 1px solid #ccc;
+                position: fixed;
+                left: 50%;
+                transform: translate(-50%, 0);
+                padding-top: 10px;
+            }
+
+            .total-slide-up .choice-wapper {
+                background: #f8f8f8;
+                border-bottom: 1px solid #ebebeb;
+            }
+
+            .total-slide-up .suglist {
+                position: fixed;
+                left: 90px;
+                top: 81px;
+            }
+
+            .search-wapper {
+                width: 100%;
+                background-color: #fff;
+            }
+
+            .search {
+                padding: 0px 0 4px 0;
+                width: 50%;
+                margin: 0 auto 0 auto;
+                height: 40px;
+                display: flex;
+                width: 600px;
+                
+                /* margin: 0 auto 0 auto; */
+            }
+            .left-wapper {
+                padding-left: 80px;
+                position: fixed;
+                width: 100%;
+                background-color: rgba(250, 250, 250, 0.95);
+            }
+            .search-left {
+                margin: 10px 0 0px 10px;
+            }
+            .search-icon {
+                height: 32px;
+                width: 32px;
+                border-radius: 50%;
+                position: absolute;
+                left: 50px;
+                top: 10px;
+            }
+            .search input {
+                outline: none;
+                display: block;
+                width: 500px;
+                height: 40px;
+                border-top: #ccc solid 1px;
+                border-right: 0;
+                border-bottom: #ccc solid 1px;
+                border-left: #ccc solid 1px;
+                padding-left: 10px;
+                /* font-size: 17px; */
+                font-size: 1.4rem;
+                box-sizing: border-box;
+                /*
+            由于total-entrancent 的height 已经和search 的相等，加上 border 就会比search 高
+            所以，将盒模型改为 ie（怪异盒模型） 使其的高度和 search 一致
+
+            */
+            }
+
+            .search input:focus {
+                border-color: #08f;
+            }
+
+            .search-btn {
+                width: 20%;
+                width: 100px;
+                height: 100%;
+                background-color: #08f;
+                background-image: url(./img/search.svg);
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: 50% 50%;
+                cursor: pointer;
+            }
+
+            .choice-wapper {
+                width: 600px;
+                margin: 0 auto 0 auto;
+                height: 30px;
+            }
+
+            .choice,
+            .choice-left {
+                width: 300px;
+                height: 29px;
+                border-radius: 4px;
+                color: #666;
+                line-height: 29px;
+                font-size: 1.4rem;
+                overflow: hidden;
+            }
+
+            .choice-left .current {
+                color: #08f;
+            }
+            .choice-w-down {
+                display: none;
+            }
+
+            .choice span,
+            .choice-left span {
+                margin: 0 10px 0 10px;
+                cursor: pointer;
+            }
+
+            .choice .current {
+                color: #08f;
+            }
+
+            .suglist {
+                width: 50%;
+                margin: 0 auto 0 auto;
+                position: relative;
+                z-index: 1;
+                padding-top: 2px;
+                border: 1px solid #e8e8e8;
+                border-top: 0;
+                box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+                background-color: #fff;
+            }
+
+            .suglist li {
+                list-style: none;
+                padding: 0 9px;
+                font-size: 1.4rem;
+                font-weight: 650;
+                cursor: pointer;
+                height: 28px;
+                line-height: 28px;
+            }
+
+            .suglist li:hover {
+                background-color: #f9f9f9;
+            }
+
+            @keyframes search-slide {
+                0% {
+                    margin-top: 18%;
+                }
+
+                100% {
+                    margin-top: 0%;
+                    border-bottom: 1px solid #ccc;
+                }
+            }
+
+            .result-wapper {
+                font-size: 1.6rem;
+                width: 80%;
+                margin: 10px auto 0 auto;
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                flex-grow: 1;
+            }
+
+            #app .next-page {
+                color: #fff;
+                text-align: center;
+                background-color: #409eff;
+                border: none;
+                outline: none;
+                width: 100px;
+                height: 30px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-left: 5px;
+            }
+            .page-buttons {
+                display: flex;
+                position: absolute;
+                transform: translateX(-50%);
+                left: 50%;
+            }
+            #app .not-allow {
+                cursor: not-allowed;
+                opacity: 0.3;
+            }
+            .result-item {
+                width: 500px;
+                padding: 5px;
+                margin: 10px;
+                margin: 10px auto 10px auto;
+                background-color: #fff;
+                box-shadow: 0 0 20px 2px rgba(0, 0, 0, 0.1);
+                transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1) 0s;
+                cursor: pointer;
+                overflow: hidden;
+                animation: appear ease-in-out 1s;
+                font-size: 1.4rem;
+            }
+
+            .result-item .ti {
+                background-color: #f8f8f8;
+                position: relative;
+                margin-bottom: 2px;
+            }
+
+            .ti .title {
+                width: auto;
+                color: #2866bd;
+            }
+
+            .ti a {
+                position: relative;
+                /*必须设置，否则伪元素的100%就不是相对整个a的 宽度*/
+            }
+
+            .title::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                left: 0;
+                bottom: 0;
+                height: 2px;
+                width: 0;
+                background-color: #08f;
+                transition: all 0.3s;
+            }
+
+            .result-item .title:hover::after {
+                /* left: 0; */
+                width: 100%;
+                right: 0;
+            }
+
+            .result-item .link_icon {
+                height: 16px;
+                width: 16px;
+                margin-right: 5px;
+            }
+            .result-item:hover {
+                box-shadow: 0 0 2px gray;
+                background: #f3f3f3;
+            }
+
+            .result-item .words {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 4;
+                overflow: hidden;
+            }
+            .introduce a {
+                color: #20692b;
+            }
+            .result-item .introduce a:hover {
+                text-decoration: underline;
+            }
+
+            @keyframes appear {
+                0% {
+                    opacity: 0;
+                }
+
+                25% {
+                    opacity: 0.25;
+                }
+
+                50% {
+                    opacity: 0.5;
+                }
+
+                75% {
+                    opacity: 0.75;
+                }
+
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            footer.footer {
+                bottom: 10px;
+                width: 200px;
+                margin: 40px auto 0 auto;
+
+                text-align: center;
+            }
+
+            .footer-bottom {
+                position: absolute;
+                bottom: 10px;
+                width: 200px;
+
+                left: 50%;
+                transform: translate(-50%, 0);
+                text-align: center;
+            }
+            /* toast 组件 的样式 */
+            .toast {
+                /* min-width: 300px; */
+                min-width: 200px;
+               
+                box-sizing: border-box;
+                border-radius: 4px;
+                border: 1px solid #fde2e2;
+                position: fixed;
+                z-index: 2;
+                left: 50%;
+                top: 20px;
+                transform: translateX(-50%);
+                background-color: #fef0f0;
+                transition: opacity 0.3s, transform 0.4s, top 0.4s;
+                overflow: hidden;
+                padding: 15px 15px 15px 15px;
+                /* align-items: center; */
+                font-size: 14px;
+                color: #f57272;
+                text-align: center;
+                display: block;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* 媒体查询 部分*/
+
+            @media screen and (max-width: 375px) {
+                html {
+                    font-size: 7px;
+                }
+
+                .search {
+                    width: 70%;
+                }
+
+                .choice-wapper {
+                    width: 70%;
+                }
+
+                .result-wapper {
+                    width: 80%;
+                }
+
+                .result-item {
+                    font-size: 1.2rem;
+                    padding: 0 2px 0 2px;
+                }
+
+                .suglist {
+                    width: 70%;
+                }
+            }
+        </style>
+        <!--通过 cdn 载入资源，减小服务器负担-->
+        <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
+        <!-- <script src="https://unpkg.com/vue@2.6.11/dist/vue.min.js"></script> -->
+        <script src="./js/vue.js"></script>
+        <script src="./js/axios.min.js"></script>
+    </head>
+
+    <body>
+        <main id="app">
+            <search-entrance
+                ref="entrance"
+                @request="Request"
+            ></search-entrance>
+            <result-wapper :results-info="resultsInfo"></result-wapper>
+            <div class="page-buttons" v-if="total!==0">
+                <button
+                    class="next-page"
+                    @click="pre"
+                    :class="{'not-allow':page===0}"
+                >
+                    上一页
+                </button>
+                <button
+                    class="next-page"
+                    @click="next"
+                    :class="{'not-allow':page===total-1}"
+                >
+                    下一页
+                </button>
+            </div>
+        </main>
+        <footer class="footer footer-bottom">
+            <p>Copyright @ Colin</p>
+            <p>supported by ltt</p>
+        </footer>
+    </body>
+
+    <!---组件 模板区域-->
+    <!--搜索框 入口组件 -->
+    <template id="search-entrance">
+        <main class="total-entrance">
+            <div class="ent-wapper">
+                <div class="choice-wapper">
+                    <section class="choice">
+                        <span
+                            v-for="(value,index) in choices"
+                            :key="index"
+                            :class="{current:index===currentIndex}"
+                            @click="choiceClick(index)"
+                            >{{value}}</span
+                        >
+                    </section>
+                </div>
+            </div>
+            <section class="search" v-if="search_style===1">
+                <input
+                    type="text"
+                    placeholder="请输入关键字"
+                    v-model="searchWord"
+                    @keyup.enter="btnClick"
+                    v-focus
+                    @input="inputHandler"
+                    ref="input1"
+                />
+                <div class="search-btn" @click="btnClick"></div>
+            </section>
+            <!--靠左搜索框部分--->
+            <section v-else class="left-wapper">
+                <img
+                    src="https://www.baidu.com/favicon.ico"
+                    alt=""
+                    class="search-icon"
+                />
+                <section class="search search-left">
+                    <input
+                        type="text"
+                        placeholder="请输入关键字"
+                        v-model="searchWord"
+                        @keyup.enter="btnClick"
+                        @input="inputHandler"
+                        @focus="showSug"
+                        ref="input2"
+                    />
+                    <div class="search-btn" @click="btnClick"></div>
+                </section>
+                <section class="choice-left">
+                    <span
+                        v-for="(value,index) in choices"
+                        :key="index"
+                        :class="{current:index===currentIndex}"
+                        @click="choiceClick(index)"
+                        >{{value}}</span
+                    >
+                </section>
+            </section>
+
+            <section
+                class="suglist"
+                v-show="isShowSug&&suggestLength!==0"
+                ref="suglist"
+            >
+                <!--search 不为空的时候才显示 sug-->
+                <li
+                    v-for="(value,index) in suggestions"
+                    :key="index"
+                    @click="sugClick(index)"
+                >
+                    {{value}}
+                </li>
+            </section>
+        </main>
+    </template>
+
+    <!--搜索结果-->
+    <template id="resultwapper">
+        <div id="result" v-if="Object.keys(resultsInfo).length!==0">
+            <div class="result-wapper">
+                <transition
+                    name="appear"
+                    v-for="(value,index) in resultsInfo"
+                    :key="index"
+                >
+                    <result-item :info="value"></result-item>
+                </transition>
+            </div>
+        </div>
+    </template>
+    <!--每一个结果 组件-->
+    <template id="resultitem">
+        <div class="result-item" v-if="Object.keys(info).length!==0">
+            <div class="ti">
+                <img :src="info.link+'/favicon.ico'" class="link_icon" />
+                <a :href="info.link" target="_blank">
+                    <span class="title">{{info.title}}</span></a
+                >
+            </div>
+            <div class="introduce">
+                <a :href="info.link" target="_blank">{{info.link}}</a>
+            </div>
+            <div class="footer">
+                <p class="words">{{info.words}}</p>
+            </div>
+        </div>
+    </template>
+
+    <!--toast 组件-->
+    <template id="toast">
+        <div class="toast" v-show="isShow">{{message}}</div>
+    </template>
+</html>
+<script>
+    // axios.get('https://www.sogou.com/suggnew/ajajjson?key=asda&type=web').then(res => {
+    //     console.log(res.data);
+
+    // });
+    //用于测试的 推荐词
+    const sug = {
+        '3': ['3d开奖结果', '3g门户', '360彩票', '360浏览器'],
+        '36': ['365房产网', '36选7开奖结果', '365', '365日历'],
+        '360': [
+            '360直播',
+            '360',
+            '360搜索',
+            '360借条',
+            '360手机助手',
+            '360彩票',
+            '360浏览器'
+        ]
+    };
+
+    //定义指令
+    //定义v-focus 的全局指令，自动聚焦  input 元素
+    Vue.directive('focus', {
+        // 当绑定元素插入到 DOM 中。
+        inserted: function(el) {
+            // 聚焦元素
+            el.focus();
+        }
+    });
+
+    //单个组件对象的定义
+    //单个 搜索结果的  div 容器
+    const resultItem = {
+        name: 'ResultItem',
+        template: '#resultitem',
+        props: {
+            info: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            }
+        }
+    };
+
+    //所有搜索结果 的 容器组件
+    const resultWapper = {
+        name: 'ResultWapper',
+        template: '#resultwapper',
+        props: {
+            resultsInfo: {
+                type: Array,
+                default() {
+                    return resultItems;
+                }
+            }
+        },
+        components: {
+            'result-item': resultItem
+        }
+    };
+
+    //toast 组件
+    const toast = {
+        name: 'Toast',
+        template: '#toast',
+        data() {
+            return {
+                message: '',
+                isShow: false
+            };
+        },
+        methods: {
+            //显示弹窗
+            show(message = '要显示的信息', duration = 2000, callback) {
+                this.message = message;
+                this.isShow = true;
+                console.log(222222);
+
+                setTimeout(() => {
+                    this.isShow = false;
+                    if (callback) {
+                        //如果传入 回调函数   则 在 文本 消失后 立即执行
+                        callback();
+                    }
+                }, duration);
+            }
+        }
+    };
+
+    //定义
+    const Toast = {};
+    Toast.install = function(Vue) {
+        //创建组件构造器
+        const ToastConstructor = Vue.extend(toast);
+        //创建组件实例
+        const toastIns = new ToastConstructor();
+        //手动将组件实例 挂载到dom元素上
+        toastIns.$mount(document.createElement('div'));
+        document.body.appendChild(toastIns.$el);
+
+        //将插件/组件实例对象  挂载到Vue原型上
+        Vue.prototype.$toast = toastIns;
+    };
+    //将toast 以 插件的形式挂载到Vue 原型，通过this 调用组件的方法
+    Vue.use(Toast);
+
+    //搜索入口组件，在本组件内 完成 关键字的第一次输入
+    const searchEntrance = {
+        name: 'SearchEntrance',
+        template: '#search-entrance',
+        data() {
+            return {
+                choices: ['网页', '微信', '视频', '博客', '知乎'],
+                currentIndex: 0,
+                searchWord: '',
+                suggestions: [],
+                isShowSug: false, //推荐词 框的显示
+                isEntry: false,
+                search_style: 1 // 搜索框类型的选择
+            };
+        },
+        methods: {
+            choiceClick(index) {
+                this.currentIndex = index;
+            },
+            sugClick(index) {
+                this.searchWord = this.suggestions[index];
+                this.$emit('request', {
+                    keyWord: this.searchWord,
+                    category: this.choice
+                });
+                console.log(' emit');
+            },
+            //在输入关键字是 进行推荐词 联想的 预请求
+            preRequest() {
+                this.suggestions = []; //每次预请求，清空之前的 推荐词
+                //发送关键字到后台 预请求，并在 axios.then里 进行一下操作
+
+                //这里用 延时进行模拟
+                new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (sug[this.searchWord]) resolve(sug[this.searchWord]);
+                    }, 50);
+                }).then(res => {
+                    if (this.searchWord) {
+                        console.log('preRequest');
+                        console.log(
+                            `keyword:${this.searchWord}    category:${this.choice}`
+                        );
+                    }
+                    this.suggestions = res;
+                    this.isShowSug = true;
+                });
+            },
+            //按下回车或者点击进行正式的请求
+            btnClick() {
+                //正式的 搜索结果 的请求 由 app组件处理
+                if (this.searchWord) {
+                    this.$emit('request', {
+                        keyWord: this.searchWord,
+                        category: this.choice
+                    });
+                    console.log(' emit');
+                    this.hidSug();
+                } else {
+                    this.$toast.show('请输入关键字');
+                }
+            },
+            inputHandler() {
+                this.preRequest();
+                this.showSug();
+            },
+            //更改样式
+            changeStyles() {
+                this.hidSug(); //关闭 建议词 的显示
+                this.search_style = 2; // 展示 第二种搜索框
+                if (this.searchWord) {
+                    if (!this.isEntry) {
+                        this.$el.classList.add('total-slide-up'); //添加类
+
+                        document
+                            .querySelector('.choice-wapper')
+                            .classList.add('choice-w-down');
+                        document
+                            .querySelector('.footer')
+                            .classList.remove('footer-bottom');
+                    }
+
+                    console.log('正式请求');
+                    console.log(
+                        `关键字:${this.searchWord}    分类:${this.choice}`
+                    );
+                }
+                this.isEntry = true;
+            },
+          
+            hidSug() {
+                this.isShowSug = false;
+            },
+            showSug() {
+                this.isShowSug = true;
+            }
+        },
+        computed: {
+            //根据 currentIndex 返回 当前选项
+            choice() {
+                return this.choices[this.currentIndex];
+            },
+            suggestLength() {
+                return this.suggestions.length;
+            }
+        },
+        mounted() {
+            //监听全局的点击事件  ,当 事件源 不是 输入框 和 推荐框，则隐藏推荐款
+            document.addEventListener('click', event => {
+                const suglist = this.$refs.suglist;
+                const input1 = this.$refs.input1;
+                const input2 = this.$refs.input2;
+                const target = event.target;
+                if (target === input1 || target === input2) {
+                    this.showSug();
+                } else if (target !== suglist) {
+                    this.hidSug();
+                }
+            });
+        }
+    };
+
+    //Vue实例
+    const app = new Vue({
+        el: '#app',
+        data: {
+            resultsInfo: [],
+            page: 0,
+            key: '',
+            category: '',
+            total: 0
+        },
+        components: {
+            'search-entrance': searchEntrance,
+            'result-wapper': resultWapper
+        },
+        methods: {
+            async Request({ key, category }) {
+                const { data } = await axios.get(
+                    `http://39.106.127.66:8080/search${this.page}`
+                );
+                console.log(data);
+                if (data.status === 200) {
+                    // this.resultsInfo=[];
+                    this.resultsInfo = data.data;
+                    this.total = data.total;
+                    this.$refs.entrance.changeStyles();
+
+                    // this.page++;
+                    //保存数据 请求下一页
+                    this.key = key;
+                    this.category = category;
+                }
+            },
+            //获取下一页的信息
+            next() {
+                if (this.page < this.total - 1) {
+                    //当前页数 小于总共的才 能请求下一页
+                    this.page++;
+                    const query = {
+                        key: this.key,
+                        category: this.category
+                    };
+                    this.resultsInfo = [];
+                    this.Request(query);
+                } else {
+                    this.$toast.show('当前为最后一页');
+                }
+            },
+            pre() {
+                if (this.page > 0) {
+                    this.page--;
+                    const query = {
+                        key: this.key,
+                        category: this.category
+                    };
+                    this.resultsInfo = [];
+                    this.Request(query);
+                } else {
+                    this.$toast.show('当前为第一页');
+                }
+            }
+        }
+    });
+
+    /*TODO:
+    1. 图片 转为base64 ，嵌入在 html 结构中
+    2.加载特效 ，vue-trantion
+    3.最后使用 工具min化，压缩大小
+
+
+
+    //列表页面：
+    1.搜索 吸顶，
+
+    3.切换页数是否更改 地址栏的 query/params   ()
+
+    */
+
+    const version = 'v1.4.0';
+    const copyright = `                                  colin Search Page((ง •̀_•́)ง)                                   
+                                     Copyright @ colin
+                                   supported by ltt(•̀ᴗ•́)و ̑̑  
+                                        ${version}`;
+    console.log(copyright);
+
+    /*TODO:
+   1.图片 转base 嵌入 
+
+   
+   */
+</script>
