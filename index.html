@@ -635,8 +635,6 @@
             show(message = '要显示的信息', duration = 2000, callback) {
                 this.message = message;
                 this.isShow = true;
-                console.log(222222);
-
                 setTimeout(() => {
                     this.isShow = false;
                     if (callback) {
@@ -747,7 +745,7 @@
                             .classList.remove('footer-bottom');
                     }
 
-                    console.log('正式请求');
+                
                     console.log(
                         `关键字:${this.searchWord}    分类:${this.choice}`
                     );
@@ -806,7 +804,7 @@
                 const { data } = await axios.get(
                     `http://39.106.127.66:8080/search${this.page}`
                 );
-                console.log(data);
+                // console.log(data);
                 if (data.status === 200) {
                     // this.resultsInfo=[];
                     this.resultsInfo = data.data;
