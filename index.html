@@ -10,8 +10,15 @@
         <title>聚合搜索</title>
         <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACi0lEQVRYR82Xu28TQRCHf7PUIN2FBtqwNm8aHkIQBIKahiQ9HSwOCAkklBRxioQCJASEBf4CJJxIVFQgHuEhHg0IEPbiCgmaeE+CEmUX3fmc2PKd7wDbx3V3O4/vZmdnZgkJjyM/b2dYNWSAYQLWA1gXqny3wDcGzBksLXhi4/skW1HrFKfkyPIQgZ0BcCyl4XkLc9UT+YWU8oFYJIAjK9cINLZiyJYtqMwInwzMO/87A9thLDYTbB6gfEPWwl73RO50Wog2AEcqRcCG0EAJBld0gb/sZNCdVXvBcBbAiC9ngS+e4DwNRAuAK9UzAPtCxVEteCmNkYaMK5UPcDd8f64F35+kvwzgSDVNwLivoAWPzY0kg/66K5UNIzHjCT7RSSdwFCbc07qgvaxF7nwaR3EyrqxcAuhcHcIc6JSYAYAr1VyY7a+14Hv+xXnTdrwCsBvAvBZ8OM4mrb1V3WmMeRMcCcOO1AqDD7sBMDBbPWyZeRCcGMZ2LZ4YfBtllwakGrfANICPWvCt3XDeFIUPALYQMFETfCYSwJHqEQEHAZS04KNdBvBPxIgFHnuCH4oEcKUqA8jBmil9Kl/sKsCNchHEJgFUtODLxarZB7lS/QCwGsAfn/sk2Ka68FMLviYuApkDZLsFmSdh5scw80KUeSn+L5pRHaIn7fiiJ3jQ4mObUfNCVwcSovswuMfsryeLhU2VVABhJLoykjWNdehU5nsylILsC7LsTstfx/Sanozlzu3qNloy7feECIjE2e9vLybuSids3X5CUZ/kU42PiQBJHa/TehqIngIERS4uEuF29BwggLipJmHRNuyQpbG+AHSA+No3gCgI/x7ZV4B646seB8wFAso1wY/+BiR4cZgwO7t9AAAAAElFTkSuQmCC" type="image/x-icon" />
         <style>
+            :root {
+                --bgc: #fff;
+                --text-color: black;
+                --input-focus-color: #08f;
+                --left-wapper-bgc: rgba(250, 250, 250, 0.95);
+            }
             html {
                 font-size: 10px;
+                background-color: var(--bgc);
             }
 
             body,
@@ -89,7 +96,7 @@
                 padding-left: 80px;
                 position: fixed;
                 width: 100%;
-                background-color: rgba(250, 250, 250, 0.95);
+                background-color: var(--left-wapper-bgc);
             }
             .search-left {
                 margin: 10px 0 0px 10px;
@@ -137,7 +144,25 @@
                 background-size: 50% 50%;
                 cursor: pointer;
             }
+            .mode {
+                width: 38px;
+                height: 38px;
+                background-image: url('./img/night.svg');
+                background-size: 100% 100%;
 
+                border: 1px solid var(--text-color);
+                border-radius: 50%;
+                position: fixed;
+                left: -19px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-color);
+                transition: right 1s linear;
+                background-color: #fff;
+            }
+            .mode:hover {
+                left: 0;
+            }
             .choice-wapper {
                 width: 600px;
                 margin: 0 auto 0 auto;
@@ -149,7 +174,7 @@
                 width: 300px;
                 height: 29px;
                 border-radius: 4px;
-                color: #666;
+                color: var(--text-color);
                 line-height: 29px;
                 font-size: 1.4rem;
                 overflow: hidden;
@@ -173,6 +198,7 @@
             }
 
             .suglist {
+                box-sizing: border-box;
                 width: 600px;
                 margin: 0 auto 0 auto;
                 position: relative;
@@ -338,7 +364,7 @@
                 bottom: 10px;
                 width: 200px;
                 margin: 40px auto 0 auto;
-
+                color: var(--text-color);
                 text-align: center;
             }
 
@@ -359,7 +385,7 @@
                 position: fixed;
                 z-index: 2;
                 left: 50%;
-                top: -50px;
+                top: -60px;
                 transform: translateX(-50%);
                 transition: opacity 0.3s, transform 0.4s, top 0.4s;
                 overflow: hidden;
@@ -459,6 +485,11 @@
                     下一页
                 </button>
             </div>
+            <div
+                class="mode"
+                :style="{backgroundImage:modeImg}"
+                @click="click"
+            ></div>
         </main>
         <footer class="footer footer-bottom">
             <p>Copyright @ Colin</p>
@@ -836,14 +867,25 @@
             page: 0,
             key: '',
             category: '',
-            total: 0
+            total: 0,
+            modeImg: 'url(./img/night.svg)', // 暗黑 模式的图片路径
+            modeSupported: false // 跟随 系统 暗黑主题 的 支持
+        },
+        computed: {
+            curMode() {
+                if (this.modeImg === 'url(./img/night.svg)') {
+                    return 'day';
+                } else {
+                    return 'night';
+                }
+            }
         },
         components: {
             'search-entrance': searchEntrance,
             'result-wapper': resultWapper
         },
         methods: {
-            async Request({ key, category },isfirst=true) {
+            async Request({ key, category }, isfirst = true) {
                 const { data } = await axios.get(
                     `http://39.106.127.66:8080/search${this.page}`
                 );
@@ -857,15 +899,13 @@
                     //保存数据 请求下一页
                     this.key = key;
                     this.category = category;
-                   if(isfirst)
-                   {
+                    if (isfirst) {
                         //在dom 完成更新 之后 提示搜索成功
-                       this.$nextTick(_=>{ 
-                        this.$mymessage.succuss('搜索成功');
-                       })
-                   }
-                }
-                else{
+                        this.$nextTick(_ => {
+                            this.$mymessage.succuss('搜索成功');
+                        });
+                    }
+                } else {
                     this.$mymessage.danger('搜索失败');
                 }
             },
@@ -879,7 +919,7 @@
                         category: this.category
                     };
                     this.resultsInfo = [];
-                    this.Request(query,false);
+                    this.Request(query, false);
                 } else {
                     this.$mymessage.warning('当前为最后一页');
                 }
@@ -892,11 +932,66 @@
                         category: this.category
                     };
                     this.resultsInfo = [];
-                    this.Request(query,false);
+                    this.Request(query, false);
                 } else {
                     this.$mymessage.warning('当前为第一页');
                 }
+            },
+            //点击切换 模式
+            click() {
+                if (this.curMode === 'day') {
+                    //处于日间模式
+                   this.darkMode();
+                    this.$mymessage.succuss('切换夜间模式');
+                } else {
+                   this.lightMode();
+                    this.$mymessage.succuss('切换日间模式');
+                }
+            },
+            darkMode(){
+                this.modeImg = 'url(./img/day2.svg)';
+                document.documentElement.style.setProperty(
+                        '--bgc',
+                        '#38444c'
+                    );
+                    document.documentElement.style.setProperty(
+                        '--text-color',
+                        '#f0f2f3'
+                    );
+                    document.documentElement.style.setProperty(
+                        '--left-wapper-bgc',
+                        '#293238'
+                    );
+            },
+            lightMode(){
+                this.modeImg = 'url(./img/night.svg)';
+                    document.documentElement.style.setProperty('--bgc', '#fff');
+                    document.documentElement.style.setProperty(
+                        '--text-color',
+                        'black'
+                    );
+                    document.documentElement.style.setProperty(
+                        '--left-wapper-bgc',
+                        'rgba(250, 250, 250, 0.95)'
+                    );
             }
+        },
+        created() {
+            const colorSchemeQuery = matchMedia('(prefers-color-scheme: dark)');
+            // 进入页面,判断 浏览器是否支持 媒体查询'(prefers-color-scheme: dark)'
+            if (colorSchemeQuery.media === '(prefers-color-scheme: dark)') {
+                if (colorSchemeQuery.matches) {
+                    this.modeImg = 'url(./img/day2.svg)';
+                    this.darkMode();
+                    this.$mymessage.succuss('跟随系统 切换到夜间模式');
+                }
+            }
+            else{
+                console.log('当前浏览器不支持第一次进入页面 跟随系统暗黑模式');
+                
+            }
+
+            //
         }
     });
 
